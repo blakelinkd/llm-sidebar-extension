@@ -1,0 +1,406 @@
+
+# filename: background.js
+chrome.sidePanel
+  .setPanelBehavior({ openPanelOnActionClick: true })
+  .catch((error) => console.error(error));
+
+# filename: README.md
+# AI Command Center Chrome Extension
+
+## Overview
+
+AI Command Center is a Chrome extension that provides a sleek, cyberpunk-themed interface for interacting with AI models through the LM Studio API. This extension allows users to send prompts to an AI model and receive responses directly within their browser.
+
+## Features
+
+- Cyberpunk-inspired neon design
+- Interactive text area for entering prompts
+- Adjustable parameters:
+  - Temperature slider (0-2)
+  - Top-k slider (1-50)
+- Real-time response display
+- Error handling and loading indicators
+
+## Installation
+
+1. Clone this repository or download the source code.
+2. Open Chrome and navigate to `chrome://extensions`.
+3. Enable "Developer mode" in the top right corner.
+4. Click "Load unpacked" and select the directory containing the extension files.
+
+## Usage
+
+1. Click on the AI Command Center icon in your Chrome toolbar to open the extension.
+2. Enter your prompt in the text area.
+3. Adjust the Temperature and Top-k parameters using the sliders if desired.
+4. Click the "Run" button to send your prompt to the AI model.
+5. Wait for the response to appear in the designated area below.
+
+## Configuration
+
+Before using the extension, make sure to update the API endpoint in the `index.js` file:
+
+```javascript
+const response = await fetch('http://192.168.0.165:1234/v1/chat/completions', {
+  // ... other fetch options
+});
+```
+
+Replace the URL with the appropriate endpoint for your LM Studio API.
+
+## Development
+
+### File Structure
+
+- `manifest.json`: Extension configuration
+- `index.html`: Main HTML structure
+- `index.css`: Styling for the extension
+- `index.js`: JavaScript for handling user interactions and API calls
+
+### Customization
+
+Feel free to modify the CSS in `index.css` to adjust the visual style of the extension. You can also update the `index.js` file to change the behavior or add new features.
+
+## Contributing
+
+Contributions are welcome! Please feel free to submit a Pull Request.
+
+## License
+
+[MIT License](LICENSE)
+
+## Disclaimer
+
+This extension is for educational purposes only. Ensure you have the necessary rights and permissions before using any AI models or APIs.
+# filename: sidepanel\index.css
+body {
+  font-family: 'Courier New', Courier, monospace;
+  color: #00ffcc; /* Neon cyan for text */
+  background-color: #0d0d0d; /* Dark background */
+  font-size: 16px;
+  margin: 0;
+  display: flex;
+  justify-content: center;
+  align-items: flex-start; /* Change this from center to flex-start */
+  min-height: 100vh; /* Change height to min-height */
+}
+
+.container {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  padding: 0 16px 16px 16px; /* Remove padding from the top only */
+  background-color: #1a1a1a; /* Dark container background */
+  border: 3px solid #00ffcc; /* Neon border */
+  border-radius: 12px;
+  box-shadow: 0 0 20px #00ffcc; /* Neon glow */
+  max-width: 600px;
+  width: 90%; /* Use percentage for better responsiveness */
+}
+
+h1 {
+  font-size: 2rem;
+  text-align: center;
+  margin-bottom: 24px;
+  color: #00ffcc; /* Neon cyan title */
+}
+
+/* Monitor (textarea) */
+.monitor {
+  width: 100%;
+  margin-bottom: 16px;
+}
+
+textarea {
+  width: 100%;
+  box-sizing: border-box; /* Include padding and border in the element's total width */
+  padding: 16px;
+  font-size: 1rem;
+  background-color: #333333;
+  color: #00ffcc;
+  border: 2px solid #00ffcc;
+  border-radius: 8px;
+  box-shadow: 0 0 10px #00ffcc;
+  resize: none;
+  outline: none;
+  min-height: 100px;
+}
+
+/* Controls (sliders and labels) */
+.controls {
+  display: flex;
+  justify-content: space-between;
+  width: 100%;
+  margin-bottom: 24px;
+}
+
+.slider-container {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+
+label {
+  color: #00ffcc;
+  font-size: 0.875rem;
+  margin-bottom: 8px;
+}
+
+input[type='range'] {
+  width: 150px;
+  -webkit-appearance: none;
+  appearance: none;
+  background: #333;
+  border-radius: 10px;
+  height: 5px;
+  outline: none;
+  cursor: pointer;
+}
+
+input[type='range']::-webkit-slider-thumb {
+  -webkit-appearance: none;
+  appearance: none;
+  width: 15px;
+  height: 15px;
+  background: #00ffcc; /* Neon thumb */
+  border-radius: 50%;
+  box-shadow: 0 0 10px #00ffcc;
+  cursor: pointer;
+}
+
+/* Buttons */
+.buttons {
+  display: flex;
+  justify-content: space-between;
+  width: 100%;
+}
+
+button {
+  background: transparent;
+  color: #00ffcc;
+  border: 2px solid #00ffcc;
+  border-radius: 8px;
+  padding: 8px 16px;
+  font-size: 1rem;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  box-shadow: 0 0 10px #00ffcc;
+}
+
+button.primary:hover,
+button.secondary:hover {
+  background-color: #00ffcc;
+  color: #0d0d0d;
+}
+
+button[disabled] {
+  background-color: #333333;
+  color: #777777;
+  border-color: #444444;
+  box-shadow: none;
+}
+
+/* Response, error, and loading text */
+.text {
+  background-color: #222222;
+  color: #00ffcc;
+  padding: 16px;
+  border-radius: 8px;
+  margin-top: 16px;
+  text-align: center;
+  border: 2px solid #00ffcc;
+  box-shadow: 0 0 10px #00ffcc;
+}
+
+.blink {
+  animation: blink 1.5s infinite;
+}
+
+@keyframes blink {
+  50% {
+    opacity: 0;
+  }
+}
+
+
+/** tooltips **/
+button[title] {
+  position: relative;
+}
+
+button[title]:hover::after {
+  content: attr(title);
+  position: absolute;
+  background: #00ffcc;
+  color: #0d0d0d;
+  border-radius: 4px;
+  padding: 5px;
+  top: -30px; /* Adjust position */
+  left: 50%;
+  transform: translateX(-50%);
+  white-space: nowrap;
+  z-index: 10;
+  box-shadow: 0 0 10px #00ffcc;
+}
+
+# filename: sidepanel\index.html
+<!doctype html>
+<html>
+  <head>
+    <link rel="stylesheet" type="text/css" href="index.css" />
+  </head>
+  <body>
+    <div class="container">
+      <h1>AI Command Center</h1>
+      <div class="monitor">
+        <textarea
+          id="input-prompt"
+          placeholder='Enter a command, e.g. "Write a haiku about Chrome Extensions"'
+          cols="30"
+          rows="5"
+        ></textarea>
+      </div>
+      <div class="controls">
+        <div class="slider-container">
+          <label for="temperature"
+            >Temperature:
+            <span id="label-temperature"></span>
+          </label>
+          <input
+            type="range"
+            id="temperature"
+            name="temperature"
+            min="0"
+            max="2"
+            step="0.01"
+          />
+        </div>
+        <div class="slider-container">
+          <label for="top-k">Top-k: <span id="label-top-k"></span></label>
+          <input type="range" id="top-k" name="top-k" min="1" max="50" step="1" />
+        </div>
+      </div>
+      <div class="buttons">
+        <button id="button-prompt" class="primary" disabled>Run</button>
+        <button id="button-reset" class="secondary" disabled>Reset</button>
+      </div>
+      <div id="response" class="text" hidden></div>
+      <div id="loading" class="text" hidden><span class="blink">Loading...</span></div>
+      <div id="error" class="text" hidden></div>
+    </div>
+    <script src="index.js" type="module"></script>
+  </body>
+</html>
+
+# filename: sidepanel\index.js
+// Elements
+const inputPrompt = document.getElementById('input-prompt');
+const buttonPrompt = document.getElementById('button-prompt');
+const buttonReset = document.getElementById('button-reset');
+const responseDiv = document.getElementById('response');
+const loadingDiv = document.getElementById('loading');
+const errorDiv = document.getElementById('error');
+const temperatureSlider = document.getElementById('temperature');
+const topKSlider = document.getElementById('top-k');
+const labelTemperature = document.getElementById('label-temperature');
+const labelTopK = document.getElementById('label-top-k');
+
+// Set initial values for sliders
+temperatureSlider.value = 0.7; // You can adjust this default value
+topKSlider.value = 40; // You can adjust this default value
+
+// Update label values for sliders
+function updateSliderLabels() {
+  labelTemperature.textContent = temperatureSlider.value;
+  labelTopK.textContent = topKSlider.value;
+}
+
+// Call this function on page load
+updateSliderLabels();
+
+temperatureSlider.addEventListener('input', updateSliderLabels);
+topKSlider.addEventListener('input', updateSliderLabels);
+
+// Enable Run button when prompt is entered
+inputPrompt.addEventListener('input', () => {
+  if (inputPrompt.value.trim()) {
+    buttonPrompt.disabled = false;
+    buttonReset.disabled = false;
+  } else {
+    buttonPrompt.disabled = true;
+    buttonReset.disabled = true;
+  }
+});
+
+// Reset button functionality
+buttonReset.addEventListener('click', () => {
+  inputPrompt.value = '';
+  responseDiv.textContent = '';
+  responseDiv.hidden = true;
+  errorDiv.textContent = '';
+  errorDiv.hidden = true;
+  buttonPrompt.disabled = true;
+  buttonReset.disabled = true;
+});
+
+// Function to send prompt to LM Studio API
+async function sendPromptToAPI(prompt, temperature, topK) {
+  try {
+    // Show loading spinner
+    loadingDiv.hidden = false;
+    responseDiv.hidden = true;
+    errorDiv.hidden = true;
+
+    // The model identifier and message structure based on your Python example
+    const requestBody = {
+      model: "model-identifier", // Replace with the correct model identifier
+      messages: [
+        { "role": "system", "content": "Always answer in rhymes." }, // System instruction
+        { "role": "user", "content": prompt } // User's input prompt
+      ],
+      temperature: parseFloat(temperature),
+      top_k: parseInt(topK), // Ensure top_k is correctly passed
+    };
+
+    // Send request to the LM Studio API
+    const response = await fetch('http://localhost:1234/v1/chat/completions', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'Authorization': 'Bearer lm-studio', // Assuming this is the required auth for LM Studio
+      },
+      body: JSON.stringify(requestBody), // Pass the structured request
+    });
+
+    if (!response.ok) {
+      throw new Error(`API error: ${response.statusText}`);
+    }
+
+    const data = await response.json();
+
+    // Assuming the response from LM Studio contains 'choices' with 'message' in 'choices[0]'
+    if (data.choices && data.choices.length > 0) {
+      responseDiv.textContent = data.choices[0].message.content;
+      responseDiv.hidden = false;
+    } else {
+      responseDiv.textContent = 'No response from AI.';
+      responseDiv.hidden = false;
+    }
+  } catch (error) {
+    errorDiv.textContent = 'Error: ' + error.message;
+    errorDiv.hidden = false;
+  } finally {
+    // Hide loading spinner
+    loadingDiv.hidden = true;
+  }
+}
+
+// Run button functionality
+buttonPrompt.addEventListener('click', () => {
+  const prompt = inputPrompt.value.trim();
+  const temperature = temperatureSlider.value;
+  const topK = topKSlider.value;
+
+  // Call the function to send prompt to the API
+  sendPromptToAPI(prompt, temperature, topK);
+});

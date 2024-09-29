@@ -1,0 +1,169 @@
+body {
+  font-family: 'Courier New', Courier, monospace;
+  color: #00ffcc; /* Neon cyan for text */
+  background-color: #0d0d0d; /* Dark background */
+  font-size: 16px;
+  margin: 0;
+  display: flex;
+  justify-content: center;
+  align-items: flex-start; /* Change this from center to flex-start */
+  min-height: 100vh; /* Change height to min-height */
+}
+
+.container {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  padding: 0 16px 16px 16px; /* Remove padding from the top only */
+  background-color: #1a1a1a; /* Dark container background */
+  border: 3px solid #00ffcc; /* Neon border */
+  border-radius: 12px;
+  box-shadow: 0 0 20px #00ffcc; /* Neon glow */
+  max-width: 600px;
+  width: 90%; /* Use percentage for better responsiveness */
+}
+
+h1 {
+  font-size: 2rem;
+  text-align: center;
+  margin-bottom: 24px;
+  color: #00ffcc; /* Neon cyan title */
+}
+
+/* Monitor (textarea) */
+.monitor {
+  width: 100%;
+  margin-bottom: 16px;
+}
+
+textarea {
+  width: 100%;
+  box-sizing: border-box; /* Include padding and border in the element's total width */
+  padding: 16px;
+  font-size: 1rem;
+  background-color: #333333;
+  color: #00ffcc;
+  border: 2px solid #00ffcc;
+  border-radius: 8px;
+  box-shadow: 0 0 10px #00ffcc;
+  resize: none;
+  outline: none;
+  min-height: 100px;
+}
+
+/* Controls (sliders and labels) */
+.controls {
+  display: flex;
+  justify-content: space-between;
+  width: 100%;
+  margin-bottom: 24px;
+}
+
+.slider-container {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+
+label {
+  color: #00ffcc;
+  font-size: 0.875rem;
+  margin-bottom: 8px;
+}
+
+input[type='range'] {
+  width: 150px;
+  -webkit-appearance: none;
+  appearance: none;
+  background: #333;
+  border-radius: 10px;
+  height: 5px;
+  outline: none;
+  cursor: pointer;
+}
+
+input[type='range']::-webkit-slider-thumb {
+  -webkit-appearance: none;
+  appearance: none;
+  width: 15px;
+  height: 15px;
+  background: #00ffcc; /* Neon thumb */
+  border-radius: 50%;
+  box-shadow: 0 0 10px #00ffcc;
+  cursor: pointer;
+}
+
+/* Buttons */
+.buttons {
+  display: flex;
+  justify-content: space-between;
+  width: 100%;
+}
+
+button {
+  background: transparent;
+  color: #00ffcc;
+  border: 2px solid #00ffcc;
+  border-radius: 8px;
+  padding: 8px 16px;
+  font-size: 1rem;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  box-shadow: 0 0 10px #00ffcc;
+}
+
+button.primary:hover,
+button.secondary:hover {
+  background-color: #00ffcc;
+  color: #0d0d0d;
+}
+
+button[disabled] {
+  background-color: #333333;
+  color: #777777;
+  border-color: #444444;
+  box-shadow: none;
+}
+
+/* Response, error, and loading text */
+.text {
+  background-color: #222222;
+  color: #00ffcc;
+  padding: 16px;
+  border-radius: 8px;
+  margin-top: 16px;
+  text-align: center;
+  border: 2px solid #00ffcc;
+  box-shadow: 0 0 10px #00ffcc;
+}
+
+.blink {
+  animation: blink 1.5s infinite;
+}
+
+@keyframes blink {
+  50% {
+    opacity: 0;
+  }
+}
+
+
+/** tooltips **/
+button[title] {
+  position: relative;
+}
+
+button[title]:hover::after {
+  content: attr(title);
+  position: absolute;
+  background: #00ffcc;
+  color: #0d0d0d;
+  border-radius: 4px;
+  padding: 5px;
+  top: -30px; /* Adjust position */
+  left: 50%;
+  transform: translateX(-50%);
+  white-space: nowrap;
+  z-index: 10;
+  box-shadow: 0 0 10px #00ffcc;
+}
