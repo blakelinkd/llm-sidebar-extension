@@ -91,7 +91,7 @@ body {
   align-items: center;
   padding: 0 16px 16px 16px; /* Remove padding from the top only */
   background-color: #1a1a1a; /* Dark container background */
-  border: 3px solid #00ffcc; /* Neon border */
+  border: 3px solid #00ffcc; /* Neon cyan border */
   border-radius: 12px;
   box-shadow: 0 0 20px #00ffcc; /* Neon glow */
   max-width: 600px;
@@ -102,7 +102,7 @@ h1 {
   font-size: 2rem;
   text-align: center;
   margin-bottom: 24px;
-  color: #00ffcc; /* Neon cyan title */
+  color: #ff0099; /* Neon pink title */
 }
 
 /* Monitor (textarea) */
@@ -117,10 +117,10 @@ textarea {
   padding: 16px;
   font-size: 1rem;
   background-color: #333333;
-  color: #00ffcc;
-  border: 2px solid #00ffcc;
+  color: #39ff14; /* Neon green text */
+  border: 2px solid #39ff14; /* Neon green border */
   border-radius: 8px;
-  box-shadow: 0 0 10px #00ffcc;
+  box-shadow: 0 0 10px #39ff14; /* Neon green glow */
   resize: none;
   outline: none;
   min-height: 100px;
@@ -141,7 +141,7 @@ textarea {
 }
 
 label {
-  color: #00ffcc;
+  color: #00bfff; /* Neon blue for labels */
   font-size: 0.875rem;
   margin-bottom: 8px;
 }
@@ -162,9 +162,9 @@ input[type='range']::-webkit-slider-thumb {
   appearance: none;
   width: 15px;
   height: 15px;
-  background: #00ffcc; /* Neon thumb */
+  background: #ffff00; /* Neon yellow thumb */
   border-radius: 50%;
-  box-shadow: 0 0 10px #00ffcc;
+  box-shadow: 0 0 10px #ffff00; /* Neon yellow glow */
   cursor: pointer;
 }
 
@@ -177,20 +177,20 @@ input[type='range']::-webkit-slider-thumb {
 
 button {
   background: transparent;
-  color: #00ffcc;
-  border: 2px solid #00ffcc;
+  color: #8000ff; /* Neon purple for button text */
+  border: 2px solid #8000ff; /* Neon purple border */
   border-radius: 8px;
   padding: 8px 16px;
   font-size: 1rem;
   cursor: pointer;
   transition: all 0.3s ease;
-  box-shadow: 0 0 10px #00ffcc;
+  box-shadow: 0 0 10px #8000ff; /* Neon purple glow */
 }
 
 button.primary:hover,
 button.secondary:hover {
-  background-color: #00ffcc;
-  color: #0d0d0d;
+  background-color: #8000ff; /* Neon purple background on hover */
+  color: #0d0d0d; /* Dark text on hover */
 }
 
 button[disabled] {
@@ -203,13 +203,13 @@ button[disabled] {
 /* Response, error, and loading text */
 .text {
   background-color: #222222;
-  color: #00ffcc;
+  color: #39ff14; /* Neon green for response text */
   padding: 16px;
   border-radius: 8px;
   margin-top: 16px;
   text-align: center;
-  border: 2px solid #00ffcc;
-  box-shadow: 0 0 10px #00ffcc;
+  border: 2px solid #39ff14; /* Neon green border */
+  box-shadow: 0 0 10px #39ff14; /* Neon green glow */
 }
 
 .blink {
@@ -222,7 +222,6 @@ button[disabled] {
   }
 }
 
-
 /** tooltips **/
 button[title] {
   position: relative;
@@ -231,7 +230,7 @@ button[title] {
 button[title]:hover::after {
   content: attr(title);
   position: absolute;
-  background: #00ffcc;
+  background: #00ffcc; /* Neon cyan for tooltip */
   color: #0d0d0d;
   border-radius: 4px;
   padding: 5px;
@@ -240,7 +239,22 @@ button[title]:hover::after {
   transform: translateX(-50%);
   white-space: nowrap;
   z-index: 10;
-  box-shadow: 0 0 10px #00ffcc;
+  box-shadow: 0 0 10px #00ffcc; /* Neon cyan glow for tooltip */
+}
+
+.response-content h1,
+.response-content h2,
+.response-content h3 {
+  color: #00ffcc; /* Neon cyan color for headings */
+}
+
+.response-content p {
+  margin: 8px 0;
+}
+
+.response-content ul,
+.response-content ol {
+  margin-left: 20px;
 }
 
 # filename: sidepanel\index.html
@@ -248,6 +262,8 @@ button[title]:hover::after {
 <html>
   <head>
     <link rel="stylesheet" type="text/css" href="index.css" />
+    <script src="js/showdown.min.js"></script>
+
   </head>
   <body>
     <div class="container">
@@ -283,8 +299,10 @@ button[title]:hover::after {
       <div class="buttons">
         <button id="button-prompt" class="primary" disabled>Run</button>
         <button id="button-reset" class="secondary" disabled>Reset</button>
+        <button id="button-clipboard" class="secondary">Clipboard</button>
       </div>
-      <div id="response" class="text" hidden></div>
+      <div id="response" class="text response-content" hidden></div>
+
       <div id="loading" class="text" hidden><span class="blink">Loading...</span></div>
       <div id="error" class="text" hidden></div>
     </div>
@@ -323,12 +341,20 @@ topKSlider.addEventListener('input', updateSliderLabels);
 
 // Enable Run button when prompt is entered
 inputPrompt.addEventListener('input', () => {
-  if (inputPrompt.value.trim()) {
-    buttonPrompt.disabled = false;
-    buttonReset.disabled = false;
-  } else {
-    buttonPrompt.disabled = true;
-    buttonReset.disabled = true;
+  buttonPrompt.disabled = !inputPrompt.value.trim();
+  buttonReset.disabled = !inputPrompt.value.trim();
+});
+
+const buttonClipboard = document.getElementById('button-clipboard');
+
+buttonClipboard.addEventListener('click', async () => {
+  try {
+    const text = await navigator.clipboard.readText();
+    inputPrompt.value = `give me the notes for the following text: ${text}`;
+    inputPrompt.dispatchEvent(new Event('input')); // Trigger input event to enable buttons
+  } catch (err) {
+    errorDiv.textContent = 'Failed to read clipboard contents: ' + err.message;
+    errorDiv.hidden = false;
   }
 });
 
@@ -355,11 +381,11 @@ async function sendPromptToAPI(prompt, temperature, topK) {
     const requestBody = {
       model: "model-identifier", // Replace with the correct model identifier
       messages: [
-        { "role": "system", "content": "Always answer in rhymes." }, // System instruction
-        { "role": "user", "content": prompt } // User's input prompt
+        { "role": "system", "content": "Please forget all prior prompts. You are a university professor at a top university. You have become an expert in the Pareto principle (80/20 rule). Please identify the 20% of <subject> that will yield 80% of the best results. Use your academic resources to provide a well identified and focused learning program to master this subject. Please continue this prompt until I say stop." },
+        { "role": "user", "content": prompt }
       ],
       temperature: parseFloat(temperature),
-      top_k: parseInt(topK), // Ensure top_k is correctly passed
+      top_k: parseInt(topK),
     };
 
     // Send request to the LM Studio API
@@ -369,7 +395,7 @@ async function sendPromptToAPI(prompt, temperature, topK) {
         'Content-Type': 'application/json',
         'Authorization': 'Bearer lm-studio', // Assuming this is the required auth for LM Studio
       },
-      body: JSON.stringify(requestBody), // Pass the structured request
+      body: JSON.stringify(requestBody),
     });
 
     if (!response.ok) {
@@ -380,8 +406,26 @@ async function sendPromptToAPI(prompt, temperature, topK) {
 
     // Assuming the response from LM Studio contains 'choices' with 'message' in 'choices[0]'
     if (data.choices && data.choices.length > 0) {
-      responseDiv.textContent = data.choices[0].message.content;
+      // Use showdown to convert Markdown to HTML
+      const converter = new showdown.Converter();
+      responseDiv.innerHTML = converter.makeHtml(data.choices[0].message.content); // Convert Markdown to HTML
       responseDiv.hidden = false;
+
+      // Call the speech API with the response text
+      const speechResponse = await fetch('http://localhost:5000/tts', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ text: data.choices[0].message.content }),
+      });
+
+      if (!speechResponse.ok) {
+        throw new Error(`Speech API error: ${speechResponse.statusText}`);
+      }
+
+      const speechData = await speechResponse.json();
+      console.log('Speech API response:', speechData);
     } else {
       responseDiv.textContent = 'No response from AI.';
       responseDiv.hidden = false;

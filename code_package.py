@@ -1,6 +1,7 @@
 import os
 import re
 from termcolor import colored
+import pyperclip
 
 # Define the root directory of your project
 root_dir = '.'
@@ -76,6 +77,11 @@ for dirpath, dirnames, filenames in os.walk(root_dir):
 
 # Write the concatenated content to the output file
 with open(output_file, 'w', encoding='utf-8') as output:
+    try:
+        pyperclip.copy(''.join(lines))
+        print(colored("📋 Output copied to clipboard", 'cyan'))
+    except ImportError:
+        print(colored("⚠️ pyperclip module not found. Install it to enable clipboard copying.", 'red'))
     output.writelines(lines)
 
 print(colored(f"✅ Source code has been concatenated into {output_file}", 'cyan'))

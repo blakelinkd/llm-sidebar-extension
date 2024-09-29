@@ -28,12 +28,20 @@ topKSlider.addEventListener('input', updateSliderLabels);
 
 // Enable Run button when prompt is entered
 inputPrompt.addEventListener('input', () => {
-  if (inputPrompt.value.trim()) {
-    buttonPrompt.disabled = false;
-    buttonReset.disabled = false;
-  } else {
-    buttonPrompt.disabled = true;
-    buttonReset.disabled = true;
+  buttonPrompt.disabled = !inputPrompt.value.trim();
+  buttonReset.disabled = !inputPrompt.value.trim();
+});
+
+const buttonClipboard = document.getElementById('button-clipboard');
+
+buttonClipboard.addEventListener('click', async () => {
+  try {
+    const text = await navigator.clipboard.readText();
+    inputPrompt.value = `give me the notes for the following text: ${text}`;
+    inputPrompt.dispatchEvent(new Event('input')); // Trigger input event to enable buttons
+  } catch (err) {
+    errorDiv.textContent = 'Failed to read clipboard contents: ' + err.message;
+    errorDiv.hidden = false;
   }
 });
 
@@ -60,11 +68,11 @@ async function sendPromptToAPI(prompt, temperature, topK) {
     const requestBody = {
       model: "model-identifier", // Replace with the correct model identifier
       messages: [
-        { "role": "system", "content": "Always answer in rhymes." }, // System instruction
-        { "role": "user", "content": prompt } // User's input prompt
+        { "role": "system", "content": "Please forget all prior prompts. You are a university professor at a top university. You have become an expert in the Pareto principle (80/20 rule). Please identify the 20% of <subject> that will yield 80% of the best results. Use your academic resources to provide a well identified and focused learning program to master this subject. Please continue this prompt until I say stop." },
+        { "role": "user", "content": prompt }
       ],
       temperature: parseFloat(temperature),
-      top_k: parseInt(topK), // Ensure top_k is correctly passed
+      top_k: parseInt(topK),
     };
 
     // Send request to the LM Studio API
@@ -74,7 +82,7 @@ async function sendPromptToAPI(prompt, temperature, topK) {
         'Content-Type': 'application/json',
         'Authorization': 'Bearer lm-studio', // Assuming this is the required auth for LM Studio
       },
-      body: JSON.stringify(requestBody), // Pass the structured request
+      body: JSON.stringify(requestBody),
     });
 
     if (!response.ok) {
@@ -85,8 +93,26 @@ async function sendPromptToAPI(prompt, temperature, topK) {
 
     // Assuming the response from LM Studio contains 'choices' with 'message' in 'choices[0]'
     if (data.choices && data.choices.length > 0) {
-      responseDiv.textContent = data.choices[0].message.content;
+      // Use showdown to convert Markdown to HTML
+      const converter = new showdown.Converter();
+      responseDiv.innerHTML = converter.makeHtml(data.choices[0].message.content); // Convert Markdown to HTML
       responseDiv.hidden = false;
+
+      // Call the speech API with the response text
+      const speechResponse = await fetch('http://localhost:5000/tts', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ text: data.choices[0].message.content }),
+      });
+
+      if (!speechResponse.ok) {
+        throw new Error(`Speech API error: ${speechResponse.statusText}`);
+      }
+
+      const speechData = await speechResponse.json();
+      console.log('Speech API response:', speechData);
     } else {
       responseDiv.textContent = 'No response from AI.';
       responseDiv.hidden = false;

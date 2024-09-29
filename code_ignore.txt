@@ -2,3 +2,5 @@ code_ignore.txt
 images
 manifest.json
 output.txt
+min.js
+min.js.map

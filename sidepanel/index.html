@@ -2,6 +2,8 @@
 <html>
   <head>
     <link rel="stylesheet" type="text/css" href="index.css" />
+    <script src="js/showdown.min.js"></script>
+
   </head>
   <body>
     <div class="container">
@@ -37,8 +39,10 @@
       <div class="buttons">
         <button id="button-prompt" class="primary" disabled>Run</button>
         <button id="button-reset" class="secondary" disabled>Reset</button>
+        <button id="button-clipboard" class="secondary">Clipboard</button>
       </div>
-      <div id="response" class="text" hidden></div>
+      <div id="response" class="text response-content" hidden></div>
+
       <div id="loading" class="text" hidden><span class="blink">Loading...</span></div>
       <div id="error" class="text" hidden></div>
     </div>
