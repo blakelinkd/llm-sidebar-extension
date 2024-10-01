@@ -23,6 +23,15 @@ body {
   width: 90%; /* Use percentage for better responsiveness */
 }
 
+.input-label {
+  color: #00bfff; /* Neon blue for labels */
+  font-size: 0.875rem;
+  margin-bottom: 8px;
+  text-align: left; /* Align the label text to the left */
+  width: 100%; /* Full width for proper alignment */
+}
+
+
 h1 {
   font-size: 2rem;
   text-align: center;
@@ -30,7 +39,7 @@ h1 {
   color: #ff0099; /* Neon pink title */
 }
 
-/* Monitor (textarea) */
+/* Filename: sidepanel/index.css */
 .monitor {
   width: 100%;
   margin-bottom: 16px;
@@ -49,6 +58,11 @@ textarea {
   resize: none;
   outline: none;
   min-height: 100px;
+}
+
+/* Ensure the styles are applied to both textarea inputs */
+textarea#input-custom-prompt {
+  min-height: 50px; /* Adjust height for custom prompt input */
 }
 
 /* Controls (sliders and labels) */

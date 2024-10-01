@@ -1,4 +1,7 @@
+// Filename: sidepanel/index.js
+
 // Elements
+const inputCustomPrompt = document.getElementById('input-custom-prompt'); // New custom prompt element
 const inputPrompt = document.getElementById('input-prompt');
 const buttonPrompt = document.getElementById('button-prompt');
 const buttonReset = document.getElementById('button-reset');
@@ -11,8 +14,8 @@ const labelTemperature = document.getElementById('label-temperature');
 const labelTopK = document.getElementById('label-top-k');
 
 // Set initial values for sliders
-temperatureSlider.value = 0.7; // You can adjust this default value
-topKSlider.value = 40; // You can adjust this default value
+temperatureSlider.value = 0.7; // Default temperature
+topKSlider.value = 40; // Default top-k
 
 // Update label values for sliders
 function updateSliderLabels() {
@@ -28,26 +31,14 @@ topKSlider.addEventListener('input', updateSliderLabels);
 
 // Enable Run button when prompt is entered
 inputPrompt.addEventListener('input', () => {
-  buttonPrompt.disabled = !inputPrompt.value.trim();
-  buttonReset.disabled = !inputPrompt.value.trim();
-});
-
-const buttonClipboard = document.getElementById('button-clipboard');
-
-buttonClipboard.addEventListener('click', async () => {
-  try {
-    const text = await navigator.clipboard.readText();
-    inputPrompt.value = `give me the notes for the following text: ${text}`;
-    inputPrompt.dispatchEvent(new Event('input')); // Trigger input event to enable buttons
-  } catch (err) {
-    errorDiv.textContent = 'Failed to read clipboard contents: ' + err.message;
-    errorDiv.hidden = false;
-  }
+  buttonPrompt.disabled = !inputPrompt.value.trim() || !inputCustomPrompt.value.trim(); // Disable if either prompt is empty
+  buttonReset.disabled = !inputPrompt.value.trim() || !inputCustomPrompt.value.trim(); // Disable if either prompt is empty
 });
 
 // Reset button functionality
 buttonReset.addEventListener('click', () => {
   inputPrompt.value = '';
+  inputCustomPrompt.value = ''; // Reset the custom prompt
   responseDiv.textContent = '';
   responseDiv.hidden = true;
   errorDiv.textContent = '';
@@ -57,7 +48,7 @@ buttonReset.addEventListener('click', () => {
 });
 
 // Function to send prompt to LM Studio API
-async function sendPromptToAPI(prompt, temperature, topK) {
+async function sendPromptToAPI(customPrompt, userPrompt, temperature, topK) {
   try {
     // Show loading spinner
     loadingDiv.hidden = false;
@@ -68,8 +59,8 @@ async function sendPromptToAPI(prompt, temperature, topK) {
     const requestBody = {
       model: "model-identifier", // Replace with the correct model identifier
       messages: [
-        { "role": "system", "content": "Please forget all prior prompts. You are a university professor at a top university. You have become an expert in the Pareto principle (80/20 rule). Please identify the 20% of <subject> that will yield 80% of the best results. Use your academic resources to provide a well identified and focused learning program to master this subject. Please continue this prompt until I say stop." },
-        { "role": "user", "content": prompt }
+        { "role": "system", "content": customPrompt }, // Use custom prompt
+        { "role": "user", "content": userPrompt } // Use user prompt
       ],
       temperature: parseFloat(temperature),
       top_k: parseInt(topK),
@@ -128,10 +119,11 @@ async function sendPromptToAPI(prompt, temperature, topK) {
 
 // Run button functionality
 buttonPrompt.addEventListener('click', () => {
-  const prompt = inputPrompt.value.trim();
+  const customPrompt = inputCustomPrompt.value.trim();
+  const userPrompt = inputPrompt.value.trim();
   const temperature = temperatureSlider.value;
   const topK = topKSlider.value;
 
   // Call the function to send prompt to the API
-  sendPromptToAPI(prompt, temperature, topK);
+  sendPromptToAPI(customPrompt, userPrompt, temperature, topK);
 });

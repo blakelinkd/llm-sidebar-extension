@@ -1,26 +1,37 @@
+<!-- Filename: sidepanel/index.html -->
 <!doctype html>
 <html>
   <head>
     <link rel="stylesheet" type="text/css" href="index.css" />
     <script src="js/showdown.min.js"></script>
-
   </head>
   <body>
     <div class="container">
       <h1>AI Command Center</h1>
+      
+      <!-- New custom prompt input area -->
+      <div class="monitor">
+        <textarea
+          id="input-custom-prompt"
+          placeholder='Enter a custom prompt, e.g. "Summarize this content:"'
+          cols="30"
+          rows="3"
+        ></textarea>
+      </div>
+
       <div class="monitor">
         <textarea
           id="input-prompt"
-          placeholder='Enter a command, e.g. "Write a haiku about Chrome Extensions"'
+          placeholder='Enter your command, e.g. "Write a haiku about Chrome Extensions"'
           cols="30"
           rows="5"
         ></textarea>
       </div>
+      
       <div class="controls">
         <div class="slider-container">
-          <label for="temperature"
-            >Temperature:
-            <span id="label-temperature"></span>
+          <label for="temperature">
+            Temperature: <span id="label-temperature"></span>
           </label>
           <input
             type="range"
@@ -42,7 +53,6 @@
         <button id="button-clipboard" class="secondary">Clipboard</button>
       </div>
       <div id="response" class="text response-content" hidden></div>
-
       <div id="loading" class="text" hidden><span class="blink">Loading...</span></div>
       <div id="error" class="text" hidden></div>
     </div>
